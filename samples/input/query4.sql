@@ -1,1 +1,1 @@
-SELECT * FROM Sailors S WHERE S.A < 6 and S.B = 200;
+SELECT * FROM Sailors S WHERE S.A < 3;

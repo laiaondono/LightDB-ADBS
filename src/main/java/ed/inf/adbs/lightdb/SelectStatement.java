@@ -3,6 +3,7 @@ package ed.inf.adbs.lightdb;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -26,6 +27,10 @@ public class SelectStatement {
     //where
     private Expression where;
     private List<Expression> allExpressionsWhere;
+    private HashMap<String, List<Expression>> auxSelectionConds = new HashMap<>();
+    private HashMap<String, List<Expression>> auxJoinConds = new HashMap<>();
+    private HashMap<String, Expression> selectionConds = new HashMap<>();
+    private HashMap<String, Expression> joinConds = new HashMap<>();
     //orderby
     private List<OrderByElement> orderBy;
     //operator
@@ -39,7 +44,7 @@ public class SelectStatement {
         from = body.getFromItem();
         joins = body.getJoins();
         where = body.getWhere();
-        allExpressionsWhere = getAllExpressions();
+        allExpressionsWhere = splitExpressions();
         orderBy = body.getOrderByElements();
 
         aliases = new HashMap<>();
@@ -71,30 +76,91 @@ public class SelectStatement {
         }
         DatabaseCatalog.setAliases(aliases);
 
-        //froms -> schema
-        //exps -> all epresionswhere
+		for (String t:schema) {
+            auxSelectionConds.put(t, new ArrayList<>());
+			auxJoinConds.put(t, new ArrayList<>());
+		}
 
+		for(Expression e:allExpressionsWhere) {
+            List<String> tables = getTablesInExpression(e);
+            int tablePos = lastIdx(tables);
+            String tableName = schema.get(tablePos);
+            if (tables.size() == 1) //s.a = 3
+                auxSelectionConds.get(tableName).add(e);
+            else auxJoinConds.get(tableName).add(e); //s.a = r.d
+        }
 
-        generateOpTree();
+        for (String t:schema) {
+            selectionConds.put(t, joinExpressions(auxSelectionConds.get(t)));
+            joinConds.put(t, joinExpressions(auxJoinConds.get(t)));
+        }
+
+        //generateOpTree(); fem crida al main
     }
 
-    private List<Expression> getAllExpressions() {
+    private List<Expression> splitExpressions() {
         List<Expression> list = new ArrayList<>();
-        while (where instanceof AndExpression) {
-            AndExpression ae = (AndExpression) where; //todo mirar si canvia el valor de where
+        Expression aux = where;
+        while (aux instanceof AndExpression) {
+            AndExpression ae = (AndExpression) aux; //todo mirar si canvia el valor de where
             list.add(ae.getRightExpression());
-            where = ae.getLeftExpression(); //ae
+            aux = ae.getLeftExpression(); //ae
         }
-        list.add(where); //todo que fa?
+        list.add(aux); //todo que fa?
 
         return list;
     }
 
-    private void generateOpTree() {
-        Operator root = new ScanOperator(schema.get(0));
-        if (where != null)
-            root = new SelectOperator((ScanOperator) root, where);
+    private List<String> getTablesInExpression(Expression e) {
+        List<String> list = new ArrayList<>();
+		Expression right = ((AndExpression) e).getRightExpression();
+		Expression left = ((AndExpression) e).getLeftExpression();
 
+		if (right instanceof Column)
+            list.add(((Column) right).getTable().toString());
+		if (left instanceof Column)
+            list.add(((Column) left).getTable().toString());
+		if (list.size() == 2 && list.get(0).equals(list.get(1)))
+            list.remove(1);
+
+		return list;
+    }
+
+    private Expression joinExpressions(List<Expression> le) {
+        Expression e = le.get(0);
+        for (int i = 1; i < le.size(); ++i)
+            e = new AndExpression(e, le.get(i));
+        return e;
+
+    }
+
+    private int lastIdx(List<String> tabs) { //todo provar el primer index
+        if (tabs == null) return schema.size() - 1; //???
+        int idx = 0;
+        for (String tab : tabs) {
+            idx = Math.max(idx, schema.indexOf(tab));
+        }
+        return idx;
+    }
+
+    public void generateOpTree() {
+        Operator root = new ScanOperator(schema.get(0));
+        if (where != null) {
+            root = new SelectOperator((ScanOperator) root, where);
+            //System.out.println("empezamosss");
+            //for (int i = 0; i < sel.size(); ++i)
+              //  System.out.println("eo " + sel.get(i));
+        }
+        for (int i = 1; i < schema.size(); ++i) {
+            Operator root2 = new ScanOperator(schema.get(i));
+            Expression where2 = selectionConds.get(schema.get(i));
+            if (where2 != null)
+                root2 = new SelectOperator((ScanOperator) root2, where2);
+            Expression whereJoin = joinConds.get(schema.get(i));
+            root = new JoinOperator(root, root2, whereJoin);
+        }
+
+        root = new ProjectOperator(sel, root); //nomes si no es select *
 
         root.dump();
 

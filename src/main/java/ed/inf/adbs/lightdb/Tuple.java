@@ -17,8 +17,16 @@ public class Tuple {
 
     }
 
-    public long get(int i) {
+    public long getTuplePos(int i) {
         return tuple[i];
+    }
+
+    public long[] getTuple() {
+        return tuple;
+    }
+
+    public int getTupleSize() {
+        return tuple.length;
     }
 
     @Override
@@ -44,4 +52,5 @@ public class Tuple {
             e.printStackTrace();
         }
     }
+
 }

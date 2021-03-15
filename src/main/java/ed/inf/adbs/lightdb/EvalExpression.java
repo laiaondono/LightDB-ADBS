@@ -11,7 +11,7 @@ import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 
 import java.util.Stack;
 
-public class EvalExpression extends ExpressionDeParser {
+public class EvalExpression {
     private Tuple t;
     private Expression e;
 
@@ -22,28 +22,30 @@ public class EvalExpression extends ExpressionDeParser {
 
     public Object evaluate () throws JSQLParserException {
         final Stack<Object> stack = new Stack<>();
-        System.out.println("where " + e);
+        //System.out.println("where " + e);
         Expression parseExpression = CCJSqlParserUtil.parseCondExpression(e.toString());
         ExpressionDeParser deparser = new ExpressionDeParser() {
             @Override
             public void visit(LongValue longValue) {
                 super.visit(longValue);
                 stack.push(longValue.getValue());
-                System.out.println("stack longvalue " + stack.toString());
-                System.out.println("long value " + longValue.toString());
+                //System.out.println("stack longvalue " + stack.toString());
+                //System.out.println("long value " + longValue.toString());
             }
 
             @Override
             public void visit(Column column) {
                 super.visit(column);
-                stack.push(t.get(0));
-                System.out.println("stack collumn " + stack.toString());
-                System.out.println("column " + column.toString());
+                int i = DatabaseCatalog.getAttrPos(column.toString());
+                stack.push(t.getTuplePos(i));
+                //System.out.println("stack collumn " + stack.toString());
+                //System.out.println("column " + column.toString());
             }
 
             @Override
             public void visit(AndExpression andExpression) {
                 super.visit(andExpression);
+                //System.out.println("stack andexpression " + stack.toString());
                 boolean facRight = Boolean.parseBoolean((stack.pop()).toString());
                 boolean facLeft = Boolean.parseBoolean((stack.pop()).toString());
 
@@ -83,7 +85,7 @@ public class EvalExpression extends ExpressionDeParser {
                 super.visit(minorThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-                System.out.println("minor than: fac1 " + facRight + ", fac2 " + facLeft);
+                //System.out.println("minor than: fac1 " + facRight + ", fac2 " + facLeft);
 
                 stack.push(facLeft < facRight);
             }
@@ -112,7 +114,7 @@ public class EvalExpression extends ExpressionDeParser {
         parseExpression.accept(deparser);
 
         Object elem = stack.pop();
-        System.out.println(e + " = " + elem + "\n");
+        //System.out.println(e + " = " + elem + "\n");
         return elem;
     }
 

@@ -34,8 +34,7 @@ public class LightDB {
             dbCat.initialiseInfo(db, input, output);
             if (statement != null) {
                 SelectStatement selState = new SelectStatement(statement);
-
-
+                selState.generateOpTree();
             }
         } catch (JSQLParserException | FileNotFoundException e) {
             e.printStackTrace();

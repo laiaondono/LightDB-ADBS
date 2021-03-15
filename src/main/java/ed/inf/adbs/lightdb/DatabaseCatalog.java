@@ -17,7 +17,7 @@ public class DatabaseCatalog {
     //aliases
     private static HashMap<String, String> aliases = new HashMap<>(); //<table, alias>
     //schemas todo cal implementar-lo
-    private static HashMap<String, long[]> schemas = new HashMap<>();
+    private static HashMap<String, Integer> attrPos = new HashMap<>();
 
 
     private DatabaseCatalog() {
@@ -30,21 +30,30 @@ public class DatabaseCatalog {
         return dbCatalog;
     }
 
-    public void initialiseInfo(String db, String i, String o) {
+    public void initialiseInfo(String db, String ip, String op) {
         try {
             dbFolderPath = db;
             dataFolderPath = dbFolderPath + "/data";
-            schemaPath = dataFolderPath + "/schema.txt";
-            inputPath = i;
-            outputPath = o;
+            schemaPath = dbFolderPath + "/schema.txt";
+            inputPath = ip;
+            outputPath = op;
+            aliases = new HashMap<>();
+
+            attrPos = new HashMap<>();
+            BufferedReader br = new BufferedReader(new FileReader(schemaPath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] splitLine = line.split("\\s+");
+                for (int i = 1; i < splitLine.length; ++i)
+                    attrPos.put(splitLine[0] + "." + splitLine[i], i-1);
+            }
+            //System.out.println("attrpossss " + attrPos.toString());
+            br.close();
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath));
             bw.write("");
             bw.close();
 
-            dataFolderPath = dbFolderPath + "/data";
-            schemaPath = dataFolderPath + "/schema.txt";
-            aliases = new HashMap<>();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,5 +79,10 @@ public class DatabaseCatalog {
 
     public static void setOutputPath(String outputPath) {
         outputPath = outputPath;
+    }
+
+    public static int getAttrPos(String attr) {
+        if (attr.equals("*")) return -1;
+        return attrPos.get(attr);
     }
 }
