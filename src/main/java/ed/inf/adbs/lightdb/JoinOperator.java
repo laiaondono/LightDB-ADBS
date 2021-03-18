@@ -16,8 +16,6 @@ public class JoinOperator extends Operator {
         this.e = e;
         leftTuple = leftOp.getNextTuple();
         rightTuple = rightOp.getNextTuple();
-        System.out.println("ini left tuple " + leftTuple);
-        System.out.println("ini right t " + rightTuple);
     }
 
     @Override
@@ -27,23 +25,14 @@ public class JoinOperator extends Operator {
 
             while (leftTuple != null && rightTuple != null) {
                 JoinEvalExpression ee = new JoinEvalExpression(leftTuple, rightTuple, e);
-                //System.out.println("where join " + e);
-                if (e == null) {
+                if (e == null)
                     ret = new Tuple(leftTuple, rightTuple);
-                    //System.out.println("e null");
-                }
-                else if (Boolean.parseBoolean(ee.evaluate().toString())) {
+                else if (Boolean.parseBoolean(ee.evaluate().toString()))
                     ret = new Tuple(leftTuple, rightTuple);
-                    //System.out.println("condicio okk");
-                }
-                System.out.println("left tuple " + leftTuple);
-                System.out.println("right t " + rightTuple);
 
                 next();
-                if (ret != null) {
-                    System.out.println("join ret tuple " + ret);
+                if (ret != null)
                     return ret;
-                }
             }
             return null;
         } catch (JSQLParserException ex) {

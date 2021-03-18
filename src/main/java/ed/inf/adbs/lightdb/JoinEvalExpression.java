@@ -19,51 +19,34 @@ public class JoinEvalExpression {
     public JoinEvalExpression(Tuple leftTuple, Tuple rightTuple, Expression e) {
         t = leftTuple;
         t2 = rightTuple;
-        System.out.println("t " + t + "t2 " + t2);
         this.e = e;
     }
 
     public Object evaluate () throws JSQLParserException {
         final Stack<Object> stack = new Stack<>();
-        //System.out.println("where evalexpr " + e);
         Expression parseExpression = CCJSqlParserUtil.parseCondExpression(e.toString());
         ExpressionDeParser deparser = new ExpressionDeParser() {
             @Override
             public void visit(LongValue longValue) {
                 super.visit(longValue);
-                //System.out.println("stack long ini " + stack.toString());
                 stack.push(longValue.getValue());
-                //System.out.println("stack longvalue " + stack.toString());
-                //System.out.println("long value " + longValue.toString());
             }
 
             @Override
             public void visit(Column column) {
                 super.visit(column);
-                System.out.println("column " + column.toString());
                 int i = DatabaseCatalog.getAttrPos(column.toString());
-                if (t.getAttrSchema().contains(column.toString())) {
-                    System.out.println(" t " + column.toString() + "  " + t.getValuePos(i));
-                    //System.out.println("stack collumn ini t " + stack.toString());
+                if (t.getAttrSchema().contains(column.toString()))
                     stack.push(t.getValuePos(i));
-                    //System.out.println("stack collumn t " + stack.toString());
-                }
-                else if (t2 != null) {
-                    System.out.println(" t2 " + column.toString() + "  " + t2.getValuePos(i));
-                    //System.out.println("stack collumn ini t2 " + stack.toString());
+                else
                     stack.push(t2.getValuePos(i));
-                    //System.out.println("stack collumn t2 " + stack.toString());
-                }
-                //System.out.println("stack collumn " + stack.toString());
             }
 
             @Override
             public void visit(AndExpression andExpression) {
                 super.visit(andExpression);
-                //System.out.println("stack andexpression " + stack.toString());
                 boolean facRight = Boolean.parseBoolean((stack.pop()).toString());
                 boolean facLeft = Boolean.parseBoolean((stack.pop()).toString());
-
                 stack.push(facLeft && facRight);
 
             }
@@ -71,10 +54,8 @@ public class JoinEvalExpression {
             @Override
             public void visit(EqualsTo equalsTo) {
                 super.visit(equalsTo);
-                //System.out.println("stack equalsto " + stack.toString());
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft == facRight);
             }
 
@@ -83,7 +64,6 @@ public class JoinEvalExpression {
                 super.visit(greaterThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft > facRight);
             }
 
@@ -92,7 +72,6 @@ public class JoinEvalExpression {
                 super.visit(greaterThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft >= facRight);
             }
 
@@ -101,8 +80,6 @@ public class JoinEvalExpression {
                 super.visit(minorThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-                //System.out.println("minor than: fac1 " + facRight + ", fac2 " + facLeft);
-
                 stack.push(facLeft < facRight);
             }
 
@@ -111,7 +88,6 @@ public class JoinEvalExpression {
                 super.visit(minorThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft <= facRight);
             }
 
@@ -120,7 +96,6 @@ public class JoinEvalExpression {
                 super.visit(notEqualsTo);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft != facRight);
             }
         };
@@ -129,9 +104,7 @@ public class JoinEvalExpression {
         deparser.setBuffer(b);
         parseExpression.accept(deparser);
 
-        Object elem = stack.pop();
-        //System.out.println(e + " = " + elem + "\n");
-        return elem;
+        return stack.pop();
     }
 
 }

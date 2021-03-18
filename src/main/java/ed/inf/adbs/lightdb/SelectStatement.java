@@ -51,8 +51,8 @@ public class SelectStatement {
         Alias aliasFrom = from.getAlias();
         if (aliasFrom != null) {
             String[] splitFrom = from.toString().split("\\s+");
-            aliases.put(splitFrom[0], aliasFrom.getName()); //todo o aliasFrom a secas
-            schema.add(aliasFrom.getName()); //todo o aliasFrom a secas
+            aliases.put(splitFrom[0], aliasFrom.getName());
+            schema.add(aliasFrom.getName());
         }
         else
             schema.add(from.toString());
@@ -84,9 +84,9 @@ public class SelectStatement {
             List<String> tables = getTablesInExpression(e);
             int tablePos = lastIdx(tables);
             String tableName = schema.get(tablePos);
-            if (tables.size() == 1) //s.a = 3
+            if (tables.size() == 1)
                 auxSelectionConds.get(tableName).add(e);
-            else auxJoinConds.get(tableName).add(e); //s.a = r.d
+            else auxJoinConds.get(tableName).add(e);
         }
 
         for (String t:schema) {
@@ -99,11 +99,11 @@ public class SelectStatement {
         List<Expression> list = new ArrayList<>();
         Expression aux = where;
         while (aux instanceof AndExpression) {
-            AndExpression ae = (AndExpression) aux; //todo mirar si canvia el valor de where
+            AndExpression ae = (AndExpression) aux;
             list.add(ae.getRightExpression());
-            aux = ae.getLeftExpression(); //ae
+            aux = ae.getLeftExpression();
         }
-        list.add(aux); //todo que fa?
+        list.add(aux);
 
         return list;
     }
@@ -134,10 +134,7 @@ public class SelectStatement {
         if (tabs == null) return schema.size() - 1; //???
         int idx = 0;
         for (String tab : tabs) {
-            //System.out.println("tab.attr " + tab);
-            String[] splitAttr = tab.toString().split("\\.");
-            //System.out.println("taula " + splitAttr[0]);
-            //System.out.println("indexof " + schema.indexOf(splitAttr[0]));
+            String[] splitAttr = tab.split("\\.");
             int tableIndex = schema.indexOf(splitAttr[0]);
             if (tableIndex > idx) idx = tableIndex;
         }
@@ -167,7 +164,7 @@ public class SelectStatement {
             root = new JoinOperator(root, root2, whereJoin);
         }
 
-        root = new ProjectOperator(sel, root); //nomes si no es select *
+        root = new ProjectOperator(sel, root); //todo?? nomes si no es select *
 
         root.dump();
     }

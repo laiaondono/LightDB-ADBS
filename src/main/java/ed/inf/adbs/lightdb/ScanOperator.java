@@ -10,7 +10,7 @@ public class ScanOperator extends Operator {
     private String path;
     private BufferedReader br;
 
-    public ScanOperator(String table) { //initialisation: opens a file scan on the appropriate data file
+    public ScanOperator(String table) {
         try {
             this.table = table;
             System.out.println("table tuplle " + table);
@@ -24,7 +24,7 @@ public class ScanOperator extends Operator {
     }
 
     @Override
-    public Tuple getNextTuple() { //reads the next line from the file and returns the next tuple
+    public Tuple getNextTuple() {
         try {
             String line = br.readLine();
             if (line == null) return null;

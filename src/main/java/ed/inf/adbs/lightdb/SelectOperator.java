@@ -18,14 +18,10 @@ public class SelectOperator extends Operator {
         try {
             Tuple t = scanOp.getNextTuple();
             while (t != null) {
-                //System.out.println("tuplle a evaluar " + t.toString());
                 Expression whereSelectOnly = SelectStatement.getSelectionCondsTable(scanOp.getTable());
                 SelectEvalExpression see = new SelectEvalExpression(t, whereSelectOnly);
-                //System.out.println("where select " + whereSelectOnly);
-                if (Boolean.parseBoolean(see.evaluate().toString())) {
-                    //System.out.println("good");
+                if (Boolean.parseBoolean(see.evaluate().toString()))
                     return t;
-                }
                 t = scanOp.getNextTuple();
             }
         } catch (JSQLParserException e) {

@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class Tuple {
@@ -28,7 +27,6 @@ public class Tuple {
         attrSchema = new ArrayList<>();
         attrSchema.addAll(leftTuple.getAttrSchema());
         attrSchema.addAll(rightTuple.getAttrSchema());
-        //System.out.println("schema tuple resulltant join " + attrSchema);
     }
 
     public long getValuePos(int i) {
@@ -46,7 +44,6 @@ public class Tuple {
     @Override
     public String toString() {
         if (tuple.length < 1) return ""; //todo cal?
- //       return Arrays.toString(tuple);
         String t = "";
         for (int i = 0; i < tuple.length; ++i) {
             t += tuple[i];

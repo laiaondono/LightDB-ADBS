@@ -22,37 +22,26 @@ public class SelectEvalExpression {
 
     public Object evaluate () throws JSQLParserException {
         final Stack<Object> stack = new Stack<>();
-        //System.out.println("where evalexpr " + e);
         Expression parseExpression = CCJSqlParserUtil.parseCondExpression(e.toString());
         ExpressionDeParser deparser = new ExpressionDeParser() {
             @Override
             public void visit(LongValue longValue) {
                 super.visit(longValue);
-                //System.out.println("stack long ini " + stack.toString());
                 stack.push(longValue.getValue());
-                //System.out.println("stack long fi " + stack.toString());
-                //System.out.println("stack longvalue " + stack.toString());
-                //System.out.println("long value " + longValue.toString());
             }
 
             @Override
             public void visit(Column column) {
                 super.visit(column);
-                //System.out.println("column " + column.toString());
                 int i = DatabaseCatalog.getAttrPos(column.toString());
-                //System.out.println("comparem atribut t " + column.toString() + " que te valor " + t.getValuePos(i));
-                //System.out.println("stack collumn ini t " + stack.toString());
                 stack.push(t.getValuePos(i));
-                //System.out.println("stack collumn " + stack.toString());
             }
 
             @Override
             public void visit(AndExpression andExpression) {
                 super.visit(andExpression);
-                //System.out.println("stack andexpression " + stack.toString());
                 boolean facRight = Boolean.parseBoolean((stack.pop()).toString());
                 boolean facLeft = Boolean.parseBoolean((stack.pop()).toString());
-
                 stack.push(facLeft && facRight);
 
             }
@@ -60,10 +49,8 @@ public class SelectEvalExpression {
             @Override
             public void visit(EqualsTo equalsTo) {
                 super.visit(equalsTo);
-                //System.out.println("stack equalsto " + stack.toString());
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft == facRight);
             }
 
@@ -72,7 +59,6 @@ public class SelectEvalExpression {
                 super.visit(greaterThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft > facRight);
             }
 
@@ -81,7 +67,6 @@ public class SelectEvalExpression {
                 super.visit(greaterThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft >= facRight);
             }
 
@@ -90,8 +75,6 @@ public class SelectEvalExpression {
                 super.visit(minorThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-                //System.out.println("minor than: fac1 " + facRight + ", fac2 " + facLeft);
-
                 stack.push(facLeft < facRight);
             }
 
@@ -100,7 +83,6 @@ public class SelectEvalExpression {
                 super.visit(minorThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft <= facRight);
             }
 
@@ -109,7 +91,6 @@ public class SelectEvalExpression {
                 super.visit(notEqualsTo);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
-
                 stack.push(facLeft != facRight);
             }
         };
@@ -118,9 +99,7 @@ public class SelectEvalExpression {
         deparser.setBuffer(b);
         parseExpression.accept(deparser);
 
-        Object elem = stack.pop();
-        //System.out.println(e + " = " + elem + "\n");
-        return elem;
+        return stack.pop();
     }
 
 }

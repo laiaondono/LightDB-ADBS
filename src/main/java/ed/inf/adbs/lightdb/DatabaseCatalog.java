@@ -5,18 +5,17 @@ import java.util.*;
 
 public class DatabaseCatalog {
     private static DatabaseCatalog dbCatalog = null;
-    //input i output path
+    //input path
     private static String inputPath = "";
+    //output path
     private static String outputPath = "";
-    //db folder
+    //db folder path
     private static String dbFolderPath = "";
     private static String dataFolderPath = "";
     private static String schemaPath = "";
-    //expected_output folder
-    private static String expected_outputFolderPath = "";
     //aliases
     private static HashMap<String, String> aliases = new HashMap<>(); //<table, alias>
-    //schemas todo cal implementar-lo
+    //schemas
     private static HashMap<String, Integer> attrPos = new HashMap<>();
 
 
@@ -48,7 +47,6 @@ public class DatabaseCatalog {
                 for (int i = 1; i < splitLine.length; ++i)
                     attrPos.put(alias + "." + splitLine[i], i-1);
             }
-            System.out.println("attrpossss " + attrPos.toString());
             br.close();
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath));
@@ -67,14 +65,9 @@ public class DatabaseCatalog {
         else return dataFolderPath + "/Sailors.csv";
     }
 
-    public static HashMap<String, String> getAliases() {
-        return aliases;
-    }
-
     public static void setAliases(HashMap<String, String> aliases) {
         try {
             DatabaseCatalog.aliases = aliases;
-            //System.out.println("aliases dbcat " + aliases);
             attrPos = new HashMap<>();
             BufferedReader br = new BufferedReader(new FileReader(schemaPath));
             String line;
@@ -84,7 +77,6 @@ public class DatabaseCatalog {
                 for (int i = 1; i < splitLine.length; ++i)
                     attrPos.put(tableName + "." + splitLine[i], i-1);
             }
-            //System.out.println("attrpossss " + attrPos.toString());
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -114,7 +106,6 @@ public class DatabaseCatalog {
                         s.add(t + "." + splitLine[i]);
                 }
             }
-            //System.out.println("dbcat schema table  " + t + "= " + s);
         } catch (IOException e) {
             e.printStackTrace();
         }
