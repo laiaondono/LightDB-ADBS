@@ -3,21 +3,35 @@ package ed.inf.adbs.lightdb;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Tuple {
     private long[] tuple;
-    private HashMap<String, Integer> attrSchema; //todo guardar atributs (sailor.A o s.a) i index de la tupla
+    private List<String> attrSchema; //todo guardar atributs (sailor.A o s.a) i index de la tupla
 
 
-    public Tuple(long[] t) {
+    public Tuple(long[] t, List<String> s) {
         this.tuple = t;
-        attrSchema = new HashMap<>();
+        attrSchema = s;
 
     }
 
-    public long getTuplePos(int i) {
+    public Tuple(Tuple leftTuple, Tuple rightTuple) {
+        tuple = new long[leftTuple.getTupleSize() + rightTuple.getTupleSize()];
+        for (int i = 0; i < tuple.length; ++i) {
+            if (i < leftTuple.getTupleSize())
+                tuple[i] = leftTuple.getValuePos(i);
+            else tuple[i] = rightTuple.getValuePos(i - leftTuple.getTupleSize());
+        }
+        attrSchema = new ArrayList<>();
+        attrSchema.addAll(leftTuple.getAttrSchema());
+        attrSchema.addAll(rightTuple.getAttrSchema());
+        //System.out.println("schema tuple resulltant join " + attrSchema);
+    }
+
+    public long getValuePos(int i) {
         return tuple[i];
     }
 
@@ -51,6 +65,16 @@ public class Tuple {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getAttrSchema() {
+        System.out.println("attrschema tuple " + attrSchema);
+        return attrSchema;
+    }
+
+    public int getAttrPos(String attr) {
+        if (attr.equals("*")) return -1;
+        return attrSchema.indexOf(attr);
     }
 
 }

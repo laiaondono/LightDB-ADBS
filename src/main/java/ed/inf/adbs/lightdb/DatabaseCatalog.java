@@ -1,7 +1,7 @@
 package ed.inf.adbs.lightdb;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.*;
 
 public class DatabaseCatalog {
     private static DatabaseCatalog dbCatalog = null;
@@ -44,10 +44,11 @@ public class DatabaseCatalog {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split("\\s+");
+                String alias = aliases.get(splitLine[0]);
                 for (int i = 1; i < splitLine.length; ++i)
-                    attrPos.put(splitLine[0] + "." + splitLine[i], i-1);
+                    attrPos.put(alias + "." + splitLine[i], i-1);
             }
-            //System.out.println("attrpossss " + attrPos.toString());
+            System.out.println("attrpossss " + attrPos.toString());
             br.close();
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath));
@@ -60,8 +61,9 @@ public class DatabaseCatalog {
     }
 
     public static String getTablePath(String table) {
-        if (table == "Boats") return dataFolderPath + "/Boats.csv"; // todo si hi ha 2 // o nomes 1
-        if (table == "Reserves") return dataFolderPath + "/Reserves.csv";
+        String table2 = (aliases.size() == 0) ? table : getTableFromAlias(table);
+        if (table2.equals("Boats")) return dataFolderPath + "/Boats.csv"; // todo si hi ha 2 // o nomes 1
+        if (table2.equals("Reserves")) return dataFolderPath + "/Reserves.csv";
         else return dataFolderPath + "/Sailors.csv";
     }
 
@@ -70,19 +72,61 @@ public class DatabaseCatalog {
     }
 
     public static void setAliases(HashMap<String, String> aliases) {
-        DatabaseCatalog.aliases = aliases;
+        try {
+            DatabaseCatalog.aliases = aliases;
+            //System.out.println("aliases dbcat " + aliases);
+            attrPos = new HashMap<>();
+            BufferedReader br = new BufferedReader(new FileReader(schemaPath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] splitLine = line.split("\\s+");
+                String tableName = (aliases.size() == 0) ? splitLine[0] : aliases.get(splitLine[0]);
+                for (int i = 1; i < splitLine.length; ++i)
+                    attrPos.put(tableName + "." + splitLine[i], i-1);
+            }
+            //System.out.println("attrpossss " + attrPos.toString());
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static String getOutputPath() {
         return outputPath;
     }
 
-    public static void setOutputPath(String outputPath) {
-        outputPath = outputPath;
-    }
-
     public static int getAttrPos(String attr) {
         if (attr.equals("*")) return -1;
         return attrPos.get(attr);
+    }
+
+    public static List<String> getTableSchema(String t) {
+        List<String> s = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(schemaPath));
+            String line;
+            String table = (aliases.size() == 0) ? t : getTableFromAlias(t);
+            while ((line = br.readLine()) != null) {
+                String[] splitLine = line.split("\\s+");
+                if (splitLine[0].equals(table)) {
+                    for (int i = 1; i < splitLine.length; ++i)
+                        s.add(t + "." + splitLine[i]);
+                }
+            }
+            //System.out.println("dbcat schema table  " + t + "= " + s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    private static String getTableFromAlias(String a) {
+        for (Map.Entry<String, String> entry:aliases.entrySet()) {
+            if (Objects.equals(a, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return "";
     }
 }

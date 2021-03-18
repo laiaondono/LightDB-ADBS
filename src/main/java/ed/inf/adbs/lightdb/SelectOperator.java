@@ -19,9 +19,10 @@ public class SelectOperator extends Operator {
             Tuple t = scanOp.getNextTuple();
             while (t != null) {
                 //System.out.println("tuplle a evaluar " + t.toString());
-                EvalExpression ee = new EvalExpression(t, where);
-                //System.out.println("where " + where);
-                if (Boolean.parseBoolean(ee.evaluate().toString())) {
+                Expression whereSelectOnly = SelectStatement.getSelectionCondsTable(scanOp.getTable());
+                SelectEvalExpression see = new SelectEvalExpression(t, whereSelectOnly);
+                //System.out.println("where select " + whereSelectOnly);
+                if (Boolean.parseBoolean(see.evaluate().toString())) {
                     //System.out.println("good");
                     return t;
                 }

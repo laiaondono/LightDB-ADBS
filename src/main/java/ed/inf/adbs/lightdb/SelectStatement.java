@@ -26,10 +26,7 @@ public class SelectStatement {
     private HashMap<String, String> aliases;
     //where
     private Expression where;
-    private List<Expression> allExpressionsWhere;
-    private HashMap<String, List<Expression>> auxSelectionConds = new HashMap<>();
-    private HashMap<String, List<Expression>> auxJoinConds = new HashMap<>();
-    private HashMap<String, Expression> selectionConds = new HashMap<>();
+    private static HashMap<String, Expression> selectionConds = new HashMap<>();
     private HashMap<String, Expression> joinConds = new HashMap<>();
     //orderby
     private List<OrderByElement> orderBy;
@@ -44,7 +41,8 @@ public class SelectStatement {
         from = body.getFromItem();
         joins = body.getJoins();
         where = body.getWhere();
-        allExpressionsWhere = splitExpressions();
+        List<Expression> allExpressionsWhere = new ArrayList<>();
+        if (where != null) allExpressionsWhere = splitExpressions();
         orderBy = body.getOrderByElements();
 
         aliases = new HashMap<>();
@@ -52,36 +50,37 @@ public class SelectStatement {
 
         Alias aliasFrom = from.getAlias();
         if (aliasFrom != null) {
-            aliases.put(aliasFrom.getName(), from.toString()); //todo o aliasFrom a secas
+            String[] splitFrom = from.toString().split("\\s+");
+            aliases.put(splitFrom[0], aliasFrom.getName()); //todo o aliasFrom a secas
             schema.add(aliasFrom.getName()); //todo o aliasFrom a secas
         }
-        else {
-            aliases.put(from.toString(), from.toString()); // o from.getname.tostrting
+        else
             schema.add(from.toString());
-        }
 
         if (joins != null) {
             for (Join j:joins) {
                 FromItem fromJoin = j.getRightItem();
                 Alias aliasJoin = fromJoin.getAlias();
                 if (aliasJoin != null) {
-                    aliases.put(fromJoin.toString(), aliasJoin.getName());
+                    String[] splitFromJoin = fromJoin.toString().split("\\s+");
+                    aliases.put(splitFromJoin[0], aliasJoin.getName());
                     schema.add(aliasJoin.getName());
                 }
-                else schema.add(fromJoin.toString());
+                else
+                    schema.add(fromJoin.toString());
             }
         }
-        else {
 
-        }
         DatabaseCatalog.setAliases(aliases);
 
+        HashMap<String, List<Expression>> auxSelectionConds = new HashMap<>();
+        HashMap<String, List<Expression>> auxJoinConds = new HashMap<>();
 		for (String t:schema) {
             auxSelectionConds.put(t, new ArrayList<>());
 			auxJoinConds.put(t, new ArrayList<>());
 		}
 
-		for(Expression e:allExpressionsWhere) {
+        for (Expression e : allExpressionsWhere) {
             List<String> tables = getTablesInExpression(e);
             int tablePos = lastIdx(tables);
             String tableName = schema.get(tablePos);
@@ -94,8 +93,6 @@ public class SelectStatement {
             selectionConds.put(t, joinExpressions(auxSelectionConds.get(t)));
             joinConds.put(t, joinExpressions(auxJoinConds.get(t)));
         }
-
-        //generateOpTree(); fem crida al main
     }
 
     private List<Expression> splitExpressions() {
@@ -113,13 +110,11 @@ public class SelectStatement {
 
     private List<String> getTablesInExpression(Expression e) {
         List<String> list = new ArrayList<>();
-		Expression right = ((AndExpression) e).getRightExpression();
-		Expression left = ((AndExpression) e).getLeftExpression();
-
-		if (right instanceof Column)
-            list.add(((Column) right).getTable().toString());
-		if (left instanceof Column)
-            list.add(((Column) left).getTable().toString());
+        String[] splitExp = e.toString().split("\\s+");
+        if (splitExp[0].contains("."))
+            list.add(splitExp[0]);
+        if (splitExp[2].contains("."))
+            list.add(splitExp[2]);
 		if (list.size() == 2 && list.get(0).equals(list.get(1)))
             list.remove(1);
 
@@ -127,6 +122,7 @@ public class SelectStatement {
     }
 
     private Expression joinExpressions(List<Expression> le) {
+        if (le.size() == 0) return null; //if that table does not have any atribute in the where clause
         Expression e = le.get(0);
         for (int i = 1; i < le.size(); ++i)
             e = new AndExpression(e, le.get(i));
@@ -134,36 +130,49 @@ public class SelectStatement {
 
     }
 
-    private int lastIdx(List<String> tabs) { //todo provar el primer index
+    private int lastIdx(List<String> tabs) { //todo provar el primer index + canviar
         if (tabs == null) return schema.size() - 1; //???
         int idx = 0;
         for (String tab : tabs) {
-            idx = Math.max(idx, schema.indexOf(tab));
+            //System.out.println("tab.attr " + tab);
+            String[] splitAttr = tab.toString().split("\\.");
+            //System.out.println("taula " + splitAttr[0]);
+            //System.out.println("indexof " + schema.indexOf(splitAttr[0]));
+            int tableIndex = schema.indexOf(splitAttr[0]);
+            if (tableIndex > idx) idx = tableIndex;
         }
         return idx;
     }
 
     public void generateOpTree() {
         Operator root = new ScanOperator(schema.get(0));
-        if (where != null) {
+        //System.out.println("scan op " + schema.get(0) + "   id " + root.toString());
+        Expression where2 = selectionConds.get(schema.get(0));
+        if (where2 != null) {
             root = new SelectOperator((ScanOperator) root, where);
-            //System.out.println("empezamosss");
-            //for (int i = 0; i < sel.size(); ++i)
-              //  System.out.println("eo " + sel.get(i));
+            //System.out.println("select op " + schema.get(0) + "   id " + root.toString());
         }
         for (int i = 1; i < schema.size(); ++i) {
-            Operator root2 = new ScanOperator(schema.get(i));
-            Expression where2 = selectionConds.get(schema.get(i));
-            if (where2 != null)
-                root2 = new SelectOperator((ScanOperator) root2, where2);
+            String t = schema.get(i);
+            Operator root2 = new ScanOperator(t);
+            //System.out.println("scan op " + t + "   id " + root2.toString());
+            Expression where3 = selectionConds.get(schema.get(i));
+            if (where3 != null) {
+                root2 = new SelectOperator((ScanOperator) root2, where3);
+                //System.out.println("select op " + schema.get(i)  + "   id " + root2.toString());
+            }
             Expression whereJoin = joinConds.get(schema.get(i));
+            //System.out.println("join op tables: " + schema.get(0) + " and " + schema.get(i));
+            //System.out.println("where condition join: " + whereJoin);
             root = new JoinOperator(root, root2, whereJoin);
         }
 
         root = new ProjectOperator(sel, root); //nomes si no es select *
 
         root.dump();
+    }
 
-
+    public static Expression getSelectionCondsTable(String table) {
+        return selectionConds.get(table);
     }
 }

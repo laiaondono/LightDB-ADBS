@@ -6,13 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class ScanOperator extends Operator {
+    private String table;
     private String path;
     private BufferedReader br;
 
     public ScanOperator(String table) { //initialisation: opens a file scan on the appropriate data file
         try {
+            this.table = table;
+            System.out.println("table tuplle " + table);
             this.path = DatabaseCatalog.getTablePath(table);
-            //System.out.println("parh scan op  " + path);
             br = new BufferedReader(new FileReader(path));
 
         } catch (FileNotFoundException e) {
@@ -31,7 +33,7 @@ public class ScanOperator extends Operator {
             for (int i = 0; i < parts.length; ++i) {
                 cols[i] = Integer.parseInt(parts[i]);
             }
-            return new Tuple(cols);
+            return new Tuple(cols, DatabaseCatalog.getTableSchema(table));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             return null;
@@ -47,5 +49,9 @@ public class ScanOperator extends Operator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public String getTable() {
+        return table;
     }
 }
