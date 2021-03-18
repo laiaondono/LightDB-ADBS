@@ -18,12 +18,6 @@ public class SelectStatement {
     private Distinct dist;
     //tables involved
     private List<String> schema;
-    //from
-    private FromItem from;
-    //joins
-    private List<Join> joins;
-    //aliases
-    private HashMap<String, String> aliases;
     //where
     private Expression where;
     private static HashMap<String, Expression> selectionConds = new HashMap<>();
@@ -38,20 +32,20 @@ public class SelectStatement {
         PlainSelect body = (PlainSelect) select.getSelectBody();
         sel = body.getSelectItems();
         dist = body.getDistinct();
-        from = body.getFromItem();
-        joins = body.getJoins();
+        FromItem from = body.getFromItem();
+        List<Join> joins = body.getJoins();
         where = body.getWhere();
         List<Expression> allExpressionsWhere = new ArrayList<>();
         if (where != null) allExpressionsWhere = splitExpressions();
         orderBy = body.getOrderByElements();
 
-        aliases = new HashMap<>();
+        HashMap<String, String> aliases = new HashMap<>();
         schema = new ArrayList<>();
 
         Alias aliasFrom = from.getAlias();
         if (aliasFrom != null) {
             String[] splitFrom = from.toString().split("\\s+");
-            aliases.put(splitFrom[0], aliasFrom.getName());
+            aliases.put(aliasFrom.getName(), splitFrom[0]);
             schema.add(aliasFrom.getName());
         }
         else
@@ -63,7 +57,7 @@ public class SelectStatement {
                 Alias aliasJoin = fromJoin.getAlias();
                 if (aliasJoin != null) {
                     String[] splitFromJoin = fromJoin.toString().split("\\s+");
-                    aliases.put(splitFromJoin[0], aliasJoin.getName());
+                    aliases.put(aliasJoin.getName(), splitFromJoin[0]);
                     schema.add(aliasJoin.getName());
                 }
                 else

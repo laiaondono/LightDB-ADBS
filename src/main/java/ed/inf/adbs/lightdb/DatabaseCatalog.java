@@ -14,13 +14,12 @@ public class DatabaseCatalog {
     private static String dataFolderPath = "";
     private static String schemaPath = "";
     //aliases
-    private static HashMap<String, String> aliases = new HashMap<>(); //<table, alias>
+    private static HashMap<String, String> aliases = new HashMap<>(); //<alias, table>
     //schemas
     private static HashMap<String, Integer> attrPos = new HashMap<>();
 
 
     private DatabaseCatalog() {
-        aliases = new HashMap<>();
     }
 
     public static DatabaseCatalog getInstance() {
@@ -59,7 +58,7 @@ public class DatabaseCatalog {
     }
 
     public static String getTablePath(String table) {
-        String table2 = (aliases.size() == 0) ? table : getTableFromAlias(table);
+        String table2 = (aliases.size() == 0) ? table : aliases.get(table);
         if (table2.equals("Boats")) return dataFolderPath + "/Boats.csv"; // todo si hi ha 2 // o nomes 1
         if (table2.equals("Reserves")) return dataFolderPath + "/Reserves.csv";
         else return dataFolderPath + "/Sailors.csv";
@@ -73,9 +72,9 @@ public class DatabaseCatalog {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split("\\s+");
-                String tableName = (aliases.size() == 0) ? splitLine[0] : aliases.get(splitLine[0]);
+                //String tableName = (aliases.size() == 0) ? splitLine[0] : aliases.get(splitLine[0]);
                 for (int i = 1; i < splitLine.length; ++i)
-                    attrPos.put(tableName + "." + splitLine[i], i-1);
+                    attrPos.put(splitLine[0] + "." + splitLine[i], i-1); //todo passar a initialiseInfo
             }
             br.close();
         } catch (IOException e) {
@@ -90,7 +89,13 @@ public class DatabaseCatalog {
 
     public static int getAttrPos(String attr) {
         if (attr.equals("*")) return -1;
-        return attrPos.get(attr);
+
+        if (aliases.size() == 0)
+            return attrPos.get(attr);
+        else {
+            String[] splitAttr = attr.split("\\.");
+            return attrPos.get(aliases.get(splitAttr[0]) + "." + splitAttr[1]);
+        }
     }
 
     public static List<String> getTableSchema(String t) {
@@ -98,7 +103,7 @@ public class DatabaseCatalog {
         try {
             BufferedReader br = new BufferedReader(new FileReader(schemaPath));
             String line;
-            String table = (aliases.size() == 0) ? t : getTableFromAlias(t);
+            String table = (aliases.size() == 0) ? t : aliases.get(t);
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split("\\s+");
                 if (splitLine[0].equals(table)) {

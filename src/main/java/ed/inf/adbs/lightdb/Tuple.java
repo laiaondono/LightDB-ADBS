@@ -65,7 +65,6 @@ public class Tuple {
     }
 
     public List<String> getAttrSchema() {
-        System.out.println("attrschema tuple " + attrSchema);
         return attrSchema;
     }
 

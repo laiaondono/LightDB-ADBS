@@ -13,7 +13,6 @@ public class ScanOperator extends Operator {
     public ScanOperator(String table) {
         try {
             this.table = table;
-            System.out.println("table tuplle " + table);
             this.path = DatabaseCatalog.getTablePath(table);
             br = new BufferedReader(new FileReader(path));
 
@@ -30,9 +29,8 @@ public class ScanOperator extends Operator {
             if (line == null) return null;
             String[] parts = line.split(",");
             long[] cols = new long[parts.length];
-            for (int i = 0; i < parts.length; ++i) {
+            for (int i = 0; i < parts.length; ++i)
                 cols[i] = Integer.parseInt(parts[i]);
-            }
             return new Tuple(cols, DatabaseCatalog.getTableSchema(table));
         } catch (IOException e) {
             // TODO Auto-generated catch block
