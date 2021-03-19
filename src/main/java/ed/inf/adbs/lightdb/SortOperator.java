@@ -12,7 +12,9 @@ public class SortOperator extends Operator {
     public SortOperator(Operator op, List<OrderByElement> order) {
         this.op = op;
         tuples = this.op.getQueryResult();
-        List<String> tupleSchema = tuples.get(0).getAttrSchema(); //todo si tuples.size es 0
+        List<String> tupleSchema = new ArrayList<>();
+        if (tuples.size() != 0)
+            tupleSchema = tuples.get(0).getAttrSchema();
         if (order != null)
             for(OrderByElement elem:order)
                 this.order.add(tupleSchema.indexOf(elem.toString()));

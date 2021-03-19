@@ -36,15 +36,14 @@ public class DatabaseCatalog {
             inputPath = ip;
             outputPath = op;
             aliases = new HashMap<>();
-
             attrPos = new HashMap<>();
+
             BufferedReader br = new BufferedReader(new FileReader(schemaPath));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split("\\s+");
-                String alias = aliases.get(splitLine[0]);
                 for (int i = 1; i < splitLine.length; ++i)
-                    attrPos.put(alias + "." + splitLine[i], i-1);
+                    attrPos.put(splitLine[0] + "." + splitLine[i], i-1);
             }
             br.close();
 
@@ -59,28 +58,13 @@ public class DatabaseCatalog {
 
     public static String getTablePath(String table) {
         String table2 = (aliases.size() == 0) ? table : aliases.get(table);
-        if (table2.equals("Boats")) return dataFolderPath + "/Boats.csv"; // todo si hi ha 2 // o nomes 1
+        if (table2.equals("Boats")) return dataFolderPath + "/Boats.csv";
         if (table2.equals("Reserves")) return dataFolderPath + "/Reserves.csv";
         else return dataFolderPath + "/Sailors.csv";
     }
 
     public static void setAliases(HashMap<String, String> aliases) {
-        try {
-            DatabaseCatalog.aliases = aliases;
-            attrPos = new HashMap<>();
-            BufferedReader br = new BufferedReader(new FileReader(schemaPath));
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] splitLine = line.split("\\s+");
-                //String tableName = (aliases.size() == 0) ? splitLine[0] : aliases.get(splitLine[0]);
-                for (int i = 1; i < splitLine.length; ++i)
-                    attrPos.put(splitLine[0] + "." + splitLine[i], i-1); //todo passar a initialiseInfo
-            }
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        DatabaseCatalog.aliases = aliases;
     }
 
     public static String getOutputPath() {

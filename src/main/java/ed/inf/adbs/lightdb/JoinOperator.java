@@ -11,7 +11,7 @@ public class JoinOperator extends Operator {
     private Tuple rightTuple;
 
     public JoinOperator (Operator lo, Operator ro, Expression e) {
-        leftOp = lo;
+        leftOp = lo; //outer table
         rightOp = ro;
         this.e = e;
         leftTuple = leftOp.getNextTuple();
@@ -19,22 +19,25 @@ public class JoinOperator extends Operator {
     }
 
     @Override
-    public Tuple getNextTuple() { //todo canviar
+    public Tuple getNextTuple() {
         try {
-            Tuple ret = null;
+            Tuple t = null;
+            while (leftTuple != null) {
+                JoinEvalExpression jee = new JoinEvalExpression(leftTuple, rightTuple, e);
+                if (e == null || Boolean.parseBoolean(jee.evaluate().toString()))
+                    t = new Tuple(leftTuple, rightTuple);
 
-            while (leftTuple != null && rightTuple != null) {
-                JoinEvalExpression ee = new JoinEvalExpression(leftTuple, rightTuple, e);
-                if (e == null)
-                    ret = new Tuple(leftTuple, rightTuple);
-                else if (Boolean.parseBoolean(ee.evaluate().toString()))
-                    ret = new Tuple(leftTuple, rightTuple);
+                if (rightTuple != null)
+                    rightTuple = rightOp.getNextTuple();
 
-                next();
-                if (ret != null)
-                    return ret;
+                if (rightTuple == null) {
+                    rightOp.reset();
+                    leftTuple = leftOp.getNextTuple();
+                    rightTuple = rightOp.getNextTuple();
+                }
+                if (t != null)
+                    return t;
             }
-            return null;
         } catch (JSQLParserException ex) {
             ex.printStackTrace();
         }
@@ -44,18 +47,5 @@ public class JoinOperator extends Operator {
     @Override
     public void reset() {
 
-    }
-
-    private void next() { //todo canviar
-        if (leftTuple == null) return;
-
-        if (rightTuple != null)
-            rightTuple = rightOp.getNextTuple();
-
-        if (rightTuple == null) {
-            leftTuple = leftOp.getNextTuple();
-            rightOp.reset();
-            rightTuple = rightOp.getNextTuple();
-        }
     }
 }

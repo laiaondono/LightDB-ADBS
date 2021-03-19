@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Tuple {
     private long[] tuple;
-    private List<String> attrSchema; //todo guardar atributs (sailor.A o s.a) i index de la tupla
+    private List<String> attrSchema;
 
     public Tuple(long[] t, List<String> s) {
         this.tuple = t;
@@ -42,7 +42,6 @@ public class Tuple {
 
     @Override
     public String toString() {
-        if (tuple.length < 1) return ""; //todo cal?
         String t = "";
         for (int i = 0; i < tuple.length; ++i) {
             t += tuple[i];

@@ -35,8 +35,6 @@ public class SelectStatement {
         FromItem from = body.getFromItem();
         List<Join> joins = body.getJoins();
         where = body.getWhere();
-        List<Expression> allExpressionsWhere = new ArrayList<>();
-        if (where != null) allExpressionsWhere = splitExpressions();
         orderBy = body.getOrderByElements();
 
         HashMap<String, String> aliases = new HashMap<>();
@@ -74,11 +72,13 @@ public class SelectStatement {
 			auxJoinConds.put(t, new ArrayList<>());
 		}
 
-        for (Expression e : allExpressionsWhere) {
-            List<String> tables = getTablesInExpression(e);
-            int tablePos = lastIdx(tables);
+        List<Expression> allExpressionsWhere = new ArrayList<>();
+        if (where != null) allExpressionsWhere = splitExpressions();
+        for (Expression e:allExpressionsWhere) {
+            List<String> tablesInExpr = getTablesInExpression(e);
+            int tablePos = getLastPos(tablesInExpr);
             String tableName = schema.get(tablePos);
-            if (tables.size() == 1)
+            if (tablesInExpr.size() == 1)
                 auxSelectionConds.get(tableName).add(e);
             else auxJoinConds.get(tableName).add(e);
         }
@@ -124,37 +124,29 @@ public class SelectStatement {
 
     }
 
-    private int lastIdx(List<String> tabs) { //todo provar el primer index + canviar
-        if (tabs == null) return schema.size() - 1; //???
-        int idx = 0;
-        for (String tab : tabs) {
-            String[] splitAttr = tab.split("\\.");
-            int tableIndex = schema.indexOf(splitAttr[0]);
-            if (tableIndex > idx) idx = tableIndex;
+    private int getLastPos(List<String> tablesInExpr) {
+        int pos = 0;
+        for (String e:tablesInExpr) {
+            String[] splitExpr = e.split("\\.");
+            int tablePos = schema.indexOf(splitExpr[0]);
+            if (tablePos > pos) pos = tablePos;
         }
-        return idx;
+        return pos;
     }
 
     public void generateOpTree() {
         Operator root = new ScanOperator(schema.get(0));
-        //System.out.println("scan op " + schema.get(0) + "   id " + root.toString());
         Expression where2 = selectionConds.get(schema.get(0));
         if (where2 != null) {
             root = new SelectOperator((ScanOperator) root, where);
-            //System.out.println("select op " + schema.get(0) + "   id " + root.toString());
         }
         for (int i = 1; i < schema.size(); ++i) {
             String t = schema.get(i);
             Operator root2 = new ScanOperator(t);
-            //System.out.println("scan op " + t + "   id " + root2.toString());
             Expression where3 = selectionConds.get(schema.get(i));
-            if (where3 != null) {
+            if (where3 != null)
                 root2 = new SelectOperator((ScanOperator) root2, where3);
-                //System.out.println("select op " + schema.get(i)  + "   id " + root2.toString());
-            }
             Expression whereJoin = joinConds.get(schema.get(i));
-            //System.out.println("join op tables: " + schema.get(0) + " and " + schema.get(i));
-            //System.out.println("where condition join: " + whereJoin);
             root = new JoinOperator(root, root2, whereJoin);
         }
 

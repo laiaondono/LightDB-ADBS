@@ -23,7 +23,6 @@ public class LightDB {
 		String inputFile = args[1];
 		String outputFile = args[2];
 
-		//parsingExample(inputFile);
 		executeQuery(databaseDir, inputFile, outputFile);
 	}
 
