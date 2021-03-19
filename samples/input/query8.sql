@@ -1,1 +1,1 @@
-SELECT * FROM Sailors ORDER BY Sailors.B;
+SELECT * FROM Sailors ORDER BY Sailors.B, Sailors.C;

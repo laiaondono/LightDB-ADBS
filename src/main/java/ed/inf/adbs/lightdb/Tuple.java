@@ -10,7 +10,6 @@ public class Tuple {
     private long[] tuple;
     private List<String> attrSchema; //todo guardar atributs (sailor.A o s.a) i index de la tupla
 
-
     public Tuple(long[] t, List<String> s) {
         this.tuple = t;
         attrSchema = s;

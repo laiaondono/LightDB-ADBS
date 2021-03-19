@@ -158,9 +158,18 @@ public class SelectStatement {
             root = new JoinOperator(root, root2, whereJoin);
         }
 
-        root = new ProjectOperator(sel, root); //todo?? nomes si no es select *
+        if (!sel.toString().equals("[*]"))
+            root = new ProjectOperator(sel, root);
 
-        root.dump();
+        if (orderBy != null) {
+            List<Tuple> result = root.getQueryResult();
+            SortOperator root2 = new SortOperator(result, orderBy);
+            root2.dump(root2.getSortedTuples());
+        }
+        else
+            root.dump();
+
+
     }
 
     public static Expression getSelectionCondsTable(String table) {

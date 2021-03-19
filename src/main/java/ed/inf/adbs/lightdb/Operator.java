@@ -20,4 +20,23 @@ public abstract class Operator {
             // TODO Auto-generated catch block
         }
     }
+
+    public void dump(List<Tuple> result) {
+        for (Tuple t:result)
+            t.dump();
+    }
+
+    public List<Tuple> getQueryResult() {
+	    List<Tuple> result =  new ArrayList<>();
+        try {
+            Tuple t = getNextTuple();
+            while (t != null) {
+                result.add(t);
+                t = getNextTuple();
+            }
+        } catch (NullPointerException e) {
+            // TODO Auto-generated catch block
+        }
+        return result;
+    }
 }
