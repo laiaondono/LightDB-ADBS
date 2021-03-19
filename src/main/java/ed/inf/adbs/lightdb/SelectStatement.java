@@ -162,12 +162,21 @@ public class SelectStatement {
             root = new ProjectOperator(sel, root);
 
         if (orderBy != null) {
-            List<Tuple> result = root.getQueryResult();
-            SortOperator root2 = new SortOperator(result, orderBy);
-            root2.dump(root2.getSortedTuples());
+            root = new SortOperator(root, orderBy);
+            if (dist != null) {
+                root = new DuplicateEliminationOperator(root, ((SortOperator) root).getSortedTuples());
+                root.dump(((DuplicateEliminationOperator) root).getUniqueTuples());
+            }
+            else root.dump(((SortOperator) root).getSortedTuples());
         }
-        else
-            root.dump();
+        else {
+            if (dist != null) {
+                root = new SortOperator(root, orderBy);
+                root = new DuplicateEliminationOperator(root, ((SortOperator) root).getSortedTuples());
+                root.dump(((DuplicateEliminationOperator) root).getUniqueTuples());
+            }
+            else root.dump();
+        }
 
 
     }

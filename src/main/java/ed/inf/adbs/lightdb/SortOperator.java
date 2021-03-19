@@ -7,15 +7,19 @@ import java.util.*;
 public class SortOperator extends Operator {
     private List<Tuple> tuples;
     private List<Integer> order = new ArrayList<>();
+    private Operator op;
 
-    public SortOperator(List<Tuple> tuples, List<OrderByElement> order) {
-        this.tuples = tuples;
+    public SortOperator(Operator op, List<OrderByElement> order) {
+        this.op = op;
+        tuples = this.op.getQueryResult();
         List<String> tupleSchema = tuples.get(0).getAttrSchema(); //todo si tuples.size es 0
-        for(OrderByElement elem:order) {
-            this.order.add(tupleSchema.indexOf(elem.toString()));
-        }
+        if (order != null)
+            for(OrderByElement elem:order)
+                this.order.add(tupleSchema.indexOf(elem.toString()));
+        else for(String elem:tupleSchema)
+                this.order.add(tupleSchema.indexOf(elem));
+
         Collections.sort(tuples, new TupleComparator());
-        System.out.println("tuples sorted " + tuples);
     }
 
     private class TupleComparator implements Comparator<Tuple> {
