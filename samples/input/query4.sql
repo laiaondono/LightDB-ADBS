@@ -1,1 +1,1 @@
-SELECT * FROM Sailors S WHERE S.A < 3 ORDER BY S.C;
+SELECT * FROM Sailors S WHERE S.A < 3;
