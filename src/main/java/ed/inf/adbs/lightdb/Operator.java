@@ -3,12 +3,18 @@ package ed.inf.adbs.lightdb;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract class that represents an operator
+ */
 public abstract class Operator {
 
     public abstract Tuple getNextTuple();
 
 	public abstract void reset();
 
+    /**
+     * Gets the resulting tuples and writes them in the output file
+     */
 	public void dump() {
         try {
             Tuple t = getNextTuple();
@@ -21,11 +27,19 @@ public abstract class Operator {
         }
     }
 
+    /**
+     * Dump method used in queries with order by
+     * @param result list of the resulting tuples
+     */
     public void dump(List<Tuple> result) {
         for (Tuple t:result)
             t.dump();
     }
 
+    /**
+     * Gets all the resulting tuples and stores them in a list
+     * @return list of resulting tuples
+     */
     public List<Tuple> getQueryResult() {
 	    List<Tuple> result =  new ArrayList<>();
         try {

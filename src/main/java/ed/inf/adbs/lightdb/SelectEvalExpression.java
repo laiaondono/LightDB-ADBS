@@ -11,34 +11,50 @@ import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 
 import java.util.Stack;
 
+/**
+ * Class used to evaluate if a tuple fulfills the conditions of a select expression
+ */
 public class SelectEvalExpression {
+    //tuple
     private Tuple t;
+    //expression to evaluate
     private Expression e;
 
+    /**
+     * SelectEvalExpression constructor
+     * @param t tuple
+     * @param e expression to evaluate
+     */
     public SelectEvalExpression(Tuple t, Expression e) {
         this.t = t;
         this.e = e;
     }
 
+    /**
+     * Evaluates the select expression in a tuple
+     * @return an Object (boolean) that is true if the tuple fulfills the expression, else false
+     * @throws JSQLParserException
+     */
     public Object evaluate () throws JSQLParserException {
+        //stack that will contain the values of the attributes in the expression and its result
         final Stack<Object> stack = new Stack<>();
         Expression parseExpression = CCJSqlParserUtil.parseCondExpression(e.toString());
         ExpressionDeParser deparser = new ExpressionDeParser() {
             @Override
-            public void visit(LongValue longValue) {
+            public void visit(LongValue longValue) { //pushes the long value to the stack
                 super.visit(longValue);
                 stack.push(longValue.getValue());
             }
 
             @Override
-            public void visit(Column column) {
+            public void visit(Column column) { //pushes the column value to the stack
                 super.visit(column);
-                int i = DatabaseCatalog.getAttrPos(column.toString());
-                stack.push(t.getValuePos(i));
+                int i = DatabaseCatalog.getAttrPos(column.toString()); //get the column position in the table schema
+                stack.push(t.getValuePos(i)); //push the value in that position of the tuple
             }
 
             @Override
-            public void visit(AndExpression andExpression) {
+            public void visit(AndExpression andExpression) { //pushes the result of an and expression to the stack
                 super.visit(andExpression);
                 boolean facRight = Boolean.parseBoolean((stack.pop()).toString());
                 boolean facLeft = Boolean.parseBoolean((stack.pop()).toString());
@@ -47,7 +63,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(EqualsTo equalsTo) {
+            public void visit(EqualsTo equalsTo) { //pushes the result of an equalsTo comparison to the stack
                 super.visit(equalsTo);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -55,7 +71,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(GreaterThan greaterThan) {
+            public void visit(GreaterThan greaterThan) { //pushes the result of a greaterThan comparison to the stack
                 super.visit(greaterThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -63,7 +79,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(GreaterThanEquals greaterThanEquals) {
+            public void visit(GreaterThanEquals greaterThanEquals) { //pushes the result of a greaterThanEquals comparison to the stack
                 super.visit(greaterThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -71,7 +87,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(MinorThan minorThan) {
+            public void visit(MinorThan minorThan) { //pushes the result of a minorThan comparison to the stack
                 super.visit(minorThan);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -79,7 +95,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(MinorThanEquals minorThanEquals) {
+            public void visit(MinorThanEquals minorThanEquals) { //pushes the result of a minorThanEquals comparison to the stack
                 super.visit(minorThanEquals);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -87,7 +103,7 @@ public class SelectEvalExpression {
             }
 
             @Override
-            public void visit(NotEqualsTo notEqualsTo) {
+            public void visit(NotEqualsTo notEqualsTo) { //pushes the result of a notEqualsTo comparison to the stack
                 super.visit(notEqualsTo);
                 long facRight = new Long(stack.pop().toString());
                 long facLeft = new Long(stack.pop().toString());
@@ -97,9 +113,9 @@ public class SelectEvalExpression {
 
         StringBuilder b = new StringBuilder();
         deparser.setBuffer(b);
-        parseExpression.accept(deparser);
+        parseExpression.accept(deparser); //evalute the expression according to the ExpressionDeParser
 
-        return stack.pop();
+        return stack.pop(); //return the final result (bool)
     }
 
 }

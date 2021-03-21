@@ -6,14 +6,16 @@ import java.io.FileReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 
 /**
- * Lightweight in-memory database system
- *
+ * Lightweight in-memory database system (main class)
  */
 public class LightDB {
 
+    /**
+     * main method
+     * @param args main arguments: database directory, input file and output file
+     */
 	public static void main(String[] args) {
 		if (args.length != 3) {
 			System.err.println("Usage: LightDB database_dir input_file output_file");
@@ -26,39 +28,24 @@ public class LightDB {
 		executeQuery(databaseDir, inputFile, outputFile);
 	}
 
+    /**
+     * Executes the query from the input file and stores the result in the output file
+     * @param db database directory
+     * @param input input file
+     * @param output output file
+     */
 	public static void executeQuery (String db, String input, String output) {
         try {
-            Statement statement = CCJSqlParserUtil.parse(new FileReader(input));
-            DatabaseCatalog dbCat = DatabaseCatalog.getInstance();
-            dbCat.initialiseInfo(db, input, output);
+            Statement statement = CCJSqlParserUtil.parse(new FileReader(input)); //get the query statement
+            DatabaseCatalog dbCat = DatabaseCatalog.getInstance(); //get the DatabaseCatalog instance
+            dbCat.initialiseInfo(db, output); //initialise it
             if (statement != null) {
-                SelectStatement selState = new SelectStatement(statement);
-                selState.generateOpTree();
+                SelectStatement selState = new SelectStatement(statement); //create a SelectStatement instance with the input query
+                selState.generateAndExecuteQueryPlan(); //generate the operator's tree and execute the query
             }
         } catch (JSQLParserException | FileNotFoundException e) {
             e.printStackTrace();
         }
 
     }
-
-	/**
-	 * Example method for getting started with JSQLParser. Reads SQL statement from
-	 * a file and prints it to screen; then extracts SelectBody from the query and
-	 * prints it to screen.
-	 */
-
-	public static void parsingExample(String filename) {
-		try {
-			Statement statement = CCJSqlParserUtil.parse(new FileReader(filename));
-//            Statement statement = CCJSqlParserUtil.parse("SELECT * FROM Boats");
-			if (statement != null) {
-				System.out.println("Read statement: " + statement);
-				Select select = (Select) statement;
-				System.out.println("Select body is " + select.getSelectBody());
-			}
-		} catch (Exception e) {
-			System.err.println("Exception occurred during parsing");
-			e.printStackTrace();
-		}
-	}
 }
