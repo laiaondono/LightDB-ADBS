@@ -1,0 +1,13 @@
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/LightDB.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/SelectOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/Tuple.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/SelectStatement.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/ProjectOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/DatabaseCatalog.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/JoinEvalExpression.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/SortOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/DuplicateEliminationOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/ScanOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/JoinOperator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/Operator.java
+/Users/laia.ondono/Documents/Auni/4t-Q2/adbs/coursework/LightDB/src/main/java/ed/inf/adbs/lightdb/SelectEvalExpression.java

@@ -50,9 +50,11 @@ public class ProjectOperator extends Operator {
         return new Tuple(newt, tupleSchema);
     }
 
-    //Not used
+    /**
+     * Calls the child operator's reset method
+     */
     @Override
     public void reset() {
-
+        op.reset();
     }
 }

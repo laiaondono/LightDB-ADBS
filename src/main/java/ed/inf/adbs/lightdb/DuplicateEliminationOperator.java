@@ -45,13 +45,13 @@ public class DuplicateEliminationOperator extends Operator {
         return tuples;
     }
 
-    //not used
+    //Not used
     @Override
     public Tuple getNextTuple() {
         return null;
     }
 
-    //not used
+    //Not used
     @Override
     public void reset() {
 

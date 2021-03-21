@@ -39,14 +39,12 @@ public class SelectStatement {
         PlainSelect body = (PlainSelect) select.getSelectBody();
         sel = body.getSelectItems();
         dist = body.getDistinct();
-        FromItem from = body.getFromItem();
-        List<Join> joins = body.getJoins();
-        where = body.getWhere();
         orderBy = body.getOrderByElements();
 
         HashMap<String, String> aliases = new HashMap<>();
         schema = new ArrayList<>();
 
+        FromItem from = body.getFromItem();
         Alias aliasFrom = from.getAlias();
         if (aliasFrom != null) { //if the query uses aliases
             String[] splitFrom = from.toString().split("\\s+");
@@ -56,6 +54,7 @@ public class SelectStatement {
         else
             schema.add(from.toString()); //add the table name to the schema
 
+        List<Join> joins = body.getJoins();
         if (joins != null) { //if we have joins
             for (Join j:joins) {
                 FromItem fromJoin = j.getRightItem(); //get the join table
@@ -72,7 +71,7 @@ public class SelectStatement {
 
         DatabaseCatalog.setAliases(aliases); //set the aliases hashmap to the db catalog (may be empty!)
 
-        //map every table to the select expressions (column op value) with its attributes
+        //map every table to the select expressions (column op value or value op value) with its attributes
         HashMap<String, List<Expression>> auxSelectionConds = new HashMap<>();
         //map every table to the join expressions (column op column) with its attributes
         HashMap<String, List<Expression>> auxJoinConds = new HashMap<>();
@@ -81,13 +80,14 @@ public class SelectStatement {
 			auxJoinConds.put(t, new ArrayList<>());
 		}
 
+        where = body.getWhere();
         List<Expression> allExpressionsWhere = new ArrayList<>();
-        if (where != null) allExpressionsWhere = splitExpressions();
+        if (where != null) allExpressionsWhere = splitExpressions(); //split the expressions of the where clause
         for (Expression e:allExpressionsWhere) {
             List<String> tablesInExpr = getTablesInExpression(e); //number of tables involved in expression e
             int tablePos = getLastPos(tablesInExpr);
             String tableName = schema.get(tablePos); //table to which the expression e will be added to
-            if (tablesInExpr.size() == 1) //select expression
+            if (tablesInExpr.size() < 2) //select expression
                 auxSelectionConds.get(tableName).add(e);
             else auxJoinConds.get(tableName).add(e); //join expression
         }

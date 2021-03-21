@@ -52,7 +52,7 @@ public class ScanOperator extends Operator {
     }
 
     /**
-     * Reset the buffer reader (used for the inner table in join)
+     * Resets the buffer reader (used for the inner table in join)
      */
     @Override
     public void reset() {

@@ -44,7 +44,9 @@ public class SelectOperator extends Operator {
         return null;
     }
 
-    //Not used
+    /**
+     * Calls the child operator's reset method
+     */
     @Override
     public void reset() {
         scanOp.reset();
